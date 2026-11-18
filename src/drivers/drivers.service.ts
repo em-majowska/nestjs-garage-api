@@ -13,17 +13,25 @@ export class DriversService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createDriverDto: CreateDriverDto) {
-    const driver = await this.prisma.driver.findUnique({
-      where: { licenseNumber: createDriverDto.licenseNumber },
-    });
+    // const driver = await this.prisma.driver.findUnique({
+    //   where: { licenseNumber: createDriverDto.licenseNumber },
+    // });
 
-    if (driver) {
-      throw new ConflictException(
-        'Le conducteur avec ce numéro de license existe déjà.',
-      );
+    // if (driver) {
+    //   throw new ConflictException(
+    //     'Le conducteur avec ce numéro de permis existe déjà.',
+    //   );
+    // }
+    try {
+      return this.prisma.driver.create({ data: createDriverDto });
+    } catch (error: any) {
+      if (error.code === 'P2002') {
+        throw new ConflictException(
+          'Le conducteur avec ce numéro de permis existe déjà.',
+        );
+      }
+      throw error;
     }
-    const newDriver = this.prisma.driver.create({ data: createDriverDto });
-    return newDriver;
   }
 
   findAll() {
@@ -31,7 +39,7 @@ export class DriversService {
   }
 
   async findOne(id: number) {
-    const driver = await this.prisma.driver.findFirst({
+    const driver = await this.prisma.driver.findUnique({
       where: { id },
       include: { cars: true },
     });
@@ -44,19 +52,31 @@ export class DriversService {
   }
 
   async findCars(id: number) {
-    const driver = await this.findOne(id);
-    return driver.cars;
+    // const driver = await this.findOne(id);
+    // return driver.cars;
+    await this.findOne(id);
+    return this.prisma.car.findMany({ where: { driverId: id } });
   }
 
   async update(id: number, updateDriverDto: UpdateDriverDto) {
     await this.findOne(id);
 
-    const payload: any = {};
-    if (updateDriverDto.licenseNumber !== undefined)
-      payload.licenseNumber = updateDriverDto.licenseNumber;
-    if (updateDriverDto.name !== undefined) payload.name = updateDriverDto.name;
+    try {
+      const payload: any = {};
+      if (updateDriverDto.licenseNumber !== undefined)
+        payload.licenseNumber = updateDriverDto.licenseNumber;
+      if (updateDriverDto.name !== undefined)
+        payload.name = updateDriverDto.name;
 
-    return this.prisma.driver.update({ where: { id }, data: payload });
+      return this.prisma.driver.update({ where: { id }, data: payload });
+    } catch (error: any) {
+      if (error.code === 'P2002') {
+        throw new ConflictException(
+          'Le conducteur avec ce numéro de permis existe déjà.',
+        );
+      }
+      throw error;
+    }
   }
 
   async remove(id: number) {

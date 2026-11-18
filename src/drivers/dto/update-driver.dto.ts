@@ -7,10 +7,10 @@ export class UpdateDriverDto extends PartialType(CreateDriverDto) {
   @IsNotEmpty()
   @MinLength(2)
   @IsOptional()
-  name: string;
+  name?: string;
 
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  licenseNumber: string;
+  licenseNumber?: string;
 }

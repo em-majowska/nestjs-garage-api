@@ -30,8 +30,4 @@ export class UpdateCarDto extends PartialType(CreateCarDto) {
   @Min(0)
   @IsOptional()
   mileage?: number;
-
-  @IsInt()
-  @IsOptional()
-  driverId?: number;
 }
