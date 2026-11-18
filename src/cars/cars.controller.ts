@@ -27,7 +27,7 @@ export class CarsController {
   }
 
   @Get()
-  findAll(@Query() query: { brand: string }) {
+  findAll(@Query() query: { brand?: string }) {
     // findAll(@Query('brand') brand: string ) {
     return this.carsService.findAll(query.brand);
   }
