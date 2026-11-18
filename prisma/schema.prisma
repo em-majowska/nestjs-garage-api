@@ -1,0 +1,27 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+model Driver {
+  id              Int     @id @default(autoincrement())
+  name            String
+  licenseNumber   String  @unique
+  cars            Car[]
+}
+
+model Car {
+  id              Int     @id @default(autoincrement())
+  brand           String
+  model           String
+  year            Int
+  mileage         Int     @default(0)
+  driverId        Int
+
+  driver          Driver  @relation(fields: [driverId], references: [id], onDelete: Restrict)
+}
